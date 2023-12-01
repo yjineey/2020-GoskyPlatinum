@@ -1,0 +1,21 @@
+{
+	"kakao" : {
+		"url" : "https://kauth.kakao.com/oauth/authorize",
+		"client_id" : "e005321d2821755d827e3a4f710f70bf",
+		"redirect_uri" : "http://localhost:8080/gugu/login/forKakao",
+		"response_type" : "code"
+	},
+	
+	"google" : {
+	
+	},
+	
+	"facebook" : {
+	
+	},
+	
+	"naver" : {
+	
+	}
+	
+}

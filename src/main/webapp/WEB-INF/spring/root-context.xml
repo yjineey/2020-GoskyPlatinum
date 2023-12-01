@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mybatis-spring="http://mybatis.org/schema/mybatis-spring"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	
+	<bean id="dataSourceSpied"
+	class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/club99?serverTimezone=Asia/Seoul" />
+		<property name="username" value="root" />
+		<property name="password" value="12345" />	
+	</bean>
+	
+	<!-- DB log -->  
+	<bean id="dataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource"> 
+	     <constructor-arg ref="dataSourceSpied" />
+	     <property name="logFormatter"> 
+	         <bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter"> 
+	             <property name="loggingType" value="MULTI_LINE" /> 
+	             <property name="sqlPrefix" value="SQL : "/> 
+	         </bean> 
+	     </property> 
+ 	</bean>	    
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+	    <property name="dataSource" ref="dataSource"/>	
+	    <property name="configLocation" value="classpath:/mybatis-config.xml"/>
+	</bean>
+	
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" destroy-method="clearCache">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactory"/>
+	</bean>
+
+	<!-- 파일업로드 크기 제한 : 최대업로드가능크기 -->
+	<bean
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver" id="multipartResolver">
+		<property value="268435456" name="maxUploadSize" />
+	</bean>
+
+	<!-- 스프링빈 id 설정 / 바탕화면의 upload 폴더 경로 지정 -->
+	<bean class="java.lang.String" id="uploadPath">
+	
+	  <constructor-arg value="D:\develop\projectWorkspace\GoSKY\src\main\webapp\resources" /> 
+			<!--<constructor-arg value="D:\project-workspace\.metadata\.plugins\org.eclipse.wst.server.core\tmp0\wtpwebapps\aaBackup4\resources" />-->
+	</bean>
+	<context:component-scan
+		base-package="kr.co.gugu.*"></context:component-scan>
+	
+</beans>

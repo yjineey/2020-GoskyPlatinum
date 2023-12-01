@@ -1,0 +1,26 @@
+{
+	"kakao" : {
+		"client_id" : "e005321d2821755d827e3a4f710f70bf",
+		"redirect_uri" : "http://localhost:8080/gugu/login/forKakao"
+	},
+	
+	"google" : {
+		"client_id" : "272435018195-0rsf5unlom1vcqoadg7sh2qp5hb2keor.apps.googleusercontent.com",
+		"redirect_uri" : "http://localhost:8080/gugu/login/forGoogle",
+		"client_secret" : "TZyAWpp3QMqCBFhn95I7Awej"
+	},
+	
+	"facebook" : {
+	
+	},
+	
+	"naver" : {
+		"client_id" : "Rw5jJ1AO4VB1rYlGWXGN",
+		"redirect_uri" : "http://localhost:8080/gugu/login/forNaver",
+		"client_secret" : "onMaqVDGxd"
+	}
+	
+}
+
+
+																 

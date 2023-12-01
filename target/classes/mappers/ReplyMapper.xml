@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="mappers.ReplyMapper"> 
+ 
+	<!-- 전체 댓글 리스트 by 해당 게시글 -->
+	<select id="getReplyList" resultType="Reply" parameterType="int">
+		SELECT *
+		FROM reply
+		WHERE bno = #{bno} AND del = 0
+		ORDER BY rno ASC
+	</select>
+	
+	<!-- 댓글 by 댓글 번호 -->
+	<select id="getReplyOne" resultType="Reply" parameterType="int">
+		SELECT *
+		FROM reply
+		WHERE rno = #{rno}
+	</select>
+	
+	<!-- 댓글 개수 -->
+	<select id="countReply" resultType="int" parameterType="int">
+		SELECT COUNT(*)
+		FROM reply
+		WHERE bno = #{bno} AND del = 0
+	</select>
+	
+	<!-- 댓글 추가 -->
+	<insert id="insertReply" parameterType="Reply">
+		INSERT INTO
+		reply (bno, mid, content)
+		values (#{bno}, #{mid}, #{content})
+	</insert>
+	
+	<!-- 댓글 수정 -->
+	<update id="updateReply" parameterType="Reply">
+		Update reply
+		SET content = #{content}
+		WHERE rno = #{rno}
+	</update>
+	
+	<!-- 댓글 삭제 -->
+	<update id="deleteReply" parameterType="int">
+		Update reply
+		SET del = 1
+		WHERE rno = #{rno}
+	</update>
+	
+</mapper>

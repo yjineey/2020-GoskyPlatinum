@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="mappers.MemberMapper"> 
+ 
+	<resultMap id="result" type="Member">
+        <result property="mno" column="mno"/>
+        <result property="msort" column="msort"/>
+        <result property="mname" column="mname"/>
+        <result property="mid" column="mid"/>
+        <result property="mpw" column="mpw"/>
+        <result property="memail" column="memail"/>
+        <result property="mjoindate" column="mjoindate"/>
+        <result property="mdel" column="mdel"/>
+        <result property="mdeldate" column="mdeldate"/>
+        <result property="etc" column="etc"/>
+        <result property="img" column="img"/>
+    </resultMap>
+ 
+ 	<!-- 중복 ID 찾기 -->
+	<select id="countById" resultType="int" parameterType="string">
+		SELECT COUNT(*)
+		FROM member
+		WHERE mid=#{mid}
+	</select>
+	
+	<!-- Member 추가 -->
+	<insert id="insertMemberBySns" parameterType="Member">
+		INSERT INTO 
+		Member (mname, mid, img) 
+		VALUES (#{mname}, #{mid}, #{img})
+	</insert>
+	
+	<!-- 테스트용 select -->
+	<select id="getUserInfo" resultType="Member" parameterType="string">
+		SELECT mid, mname, img, msort, mno,memail,number
+		FROM member
+		WHERE mid=#{id}
+	</select>
+	
+	
+	
+	
+	
+	<!-- 중복 Email 찾기 -->
+	<select id="countByEmail" resultType="int" parameterType="string">
+		SELECT COUNT(*) 
+		FROM member 
+		WHERE memail=#{memail}
+	</select>
+	
+	<!-- Member 추가 -->
+	<insert id="insertMember" parameterType="Member">
+		INSERT INTO 
+		Member (mid, mpw, mname, memail, img) 
+		VALUES (#{mid}, #{mpw}, #{mname}, #{memail}, 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png')
+	</insert>
+	
+	<!-- Member 추가 -->
+	<insert id="insertteacher" parameterType="Member">
+		INSERT INTO 
+		Member (msort,mid, mpw, mname, memail, img) 
+		VALUES ('m02',#{mid}, #{mpw}, #{mname}, #{memail}, 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png')
+	</insert>
+	
+	<!-- ID PW 체크  -->
+	<select id="countByIdAndPw" resultType="int" parameterType="java.util.Map">
+		SELECT COUNT(*) 
+		FROM member 
+		WHERE mid=#{mid} AND mpw=#{mpw}
+	</select>
+	
+	<!-- 이름 가져오기  -->
+	<select id="getUserName" resultType="string" parameterType="string">
+		SELECT mname 
+		FROM member 
+		WHERE mid=#{mid}
+	</select>
+	
+	<!-- 이름 가져오기  -->
+	<select id="getUserName2" resultType="string" parameterType="int">
+		SELECT mname 
+		FROM member 
+		WHERE mno=#{mno}
+	</select>
+
+
+	<!-- 비밀번호 찾기  -->
+	<select id="findpw" parameterType="Member" resultType="Member">
+		SELECT mpw
+		FROM member 
+		WHERE mid=#{mid} AND memail=#{memail}
+	</select>
+	<!-- 비밀번호 변경 --> 
+	<update id="resetPw" parameterType="Member">
+		update member
+  		set
+   		mpw= #{mpw}
+  		where mid = #{mid} AND memail=#{memail}
+	</update>
+	<!-- 아이디 찾기  -->
+	<select id="findId" parameterType="Member" resultType="Member">
+		SELECT mid
+		FROM member 
+		WHERE  mname=#{mname} AND memail=#{memail}
+	</select>
+	
+
+
+
+
+
+
+	<!-- 
+	
+			People
+	
+	 -->
+	
+	<!-- 학생 이름 가져오기  -->
+	<select id="getPeopleName" resultType="string" parameterType="int">
+		SELECT pname 
+		FROM people
+		WHERE pno=#{pno}
+	</select>
+	
+	<!-- 학생의 관리자 이름 가져오기  -->
+	<select id="getPeopleManagerName" resultType="string" parameterType="int">
+		SELECT mname 
+		FROM member
+		WHERE mid IN (SELECT mid
+					  FROM people
+					  WHERE pno = #{pno} )
+	</select>
+	
+
+</mapper>

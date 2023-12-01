@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<typeAliases>
+		<typeAlias alias="Member" type="kr.co.gugu.domain.MemberDTO" />
+		<typeAlias alias="Board" type="kr.co.gugu.domain.BoardDTO" />
+		<typeAlias alias="Reply" type="kr.co.gugu.domain.ReplyDTO" />
+		<typeAlias alias="SearchPaging" type="kr.co.gugu.page.SearchPaging" />
+		<typeAlias alias="Subject" type="kr.co.gugu.domain.SubjectDTO" />
+		<typeAlias alias="Act" type="kr.co.gugu.domain.ActDTO" />
+		<typeAlias alias="WorkList" type="kr.co.gugu.domain.WorkListDTO" />
+		<typeAlias alias="InterviewDTO" type="kr.co.gugu.domain.InterviewDTO" />
+		
+		
+		<!-- 서현꺼 -->
+		<typeAlias alias="InterviewReply" type="kr.co.gugu.domain.InterviewReply" />
+		<typeAlias alias="Pagination" type="kr.co.gugu.domain.Pagination" />
+		<typeAlias alias="Search" type="kr.co.gugu.domain.Search" />
+		<typeAlias alias="MessageReply" type="kr.co.gugu.domain.MessageReply" />
+		<typeAlias alias="MessageDTO" type="kr.co.gugu.domain.MessageDTO" />
+		<typeAlias alias="SubjectDTO" type="kr.co.gugu.domain.SubjectDTO" />
+		<typeAlias alias="ClassDTO" type="kr.co.gugu.domain.ClassDTO" />
+		<typeAlias alias="PeopleDTO" type="kr.co.gugu.domain.PeopleDTO" />
+		<typeAlias alias="ActDTO" type="kr.co.gugu.domain.ActDTO" />
+		<typeAlias alias="RoomDTO" type="kr.co.gugu.domain.RoomDTO" />
+
+		<typeAlias alias="TeacherDTO" type="kr.co.gugu.domain.TeacherDTO" />
+		<typeAlias alias="WorkListDTO" type="kr.co.gugu.domain.WorkListDTO" />
+
+		<typeAlias alias="AttendanceDTO" type="kr.co.gugu.domain.AttendanceDTO" />
+
+	</typeAliases>
+
+	<mappers>
+		<mapper resource="mappers/MemberMapper.xml" />
+		<mapper resource="mappers/BoardMapper.xml" />
+		<mapper resource="mappers/ReplyMapper.xml" />
+		<mapper resource="mappers/SubjectMapper.xml" />
+		
+		<mapper resource="mappers/WorkListMapper.xml" />
+		
+		
+		<!-- 서현맵퍼 -->
+		<mapper resource="mappers/InterviewMapper.xml" />
+		<mapper resource="mappers/MessageMapper.xml" />
+		<mapper resource="mappers/ClassApplyMapper.xml" />
+		<mapper resource="mappers/AttendanceMapper.xml" />
+		
+		<!-- 보윤매퍼 -->
+		<mapper resource="mappers/RoomMapper.xml" />
+		<mapper resource="mappers/IntroMapper.xml" />
+
+		<mapper resource="mappers/StudentMapper.xml" />
+		<mapper resource="mappers/TeacherMapper.xml" />
+		<mapper resource="mappers/WorkListMapper.xml" />
+		
+	</mappers>
+</configuration>

@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mappers.AttendanceMapper">
+	
+	<select id="getAllAttendance" parameterType="String" resultType="AttendanceDTO">
+	select * from attendance
+	where date=#{date}
+	</select>
+	
+	<!-- pno로 출결조회 -->
+	<select id="getAttendance" parameterType="AttendanceDTO" resultType="AttendanceDTO" >
+		SELECT ano, date, asort, number, att,acontent,adate ,befor,beforcon,after,aftercon,pname  
+		FROM attendance  left JOIN people  ON attendance.number = people.pno 
+		where attendance.asort=2 and attendance.number=#{number};
+		
+		
+	</select>
+	
+	<!-- ano로 출결조회 -->
+	<select id="getAttendanceAno" parameterType="Int" resultType="AttendanceDTO">
+	select *
+		from attendance 
+		where ano=#{ano} ;
+	</select>
+	
+	<!-- mno로(강사) 출결조회 -->
+	<select id="getAttendancemno" parameterType="AttendanceDTO" resultType="AttendanceDTO" >
+		SELECT * 
+		FROM attendance 
+		 left JOIN (club99.member)  ON attendance.number = (club99.member.mno) 
+		where attendance.asort=#{asort} and attendance.number=#{number} and attendance.date=#{date};
+		
+	</select>
+	
+	<!-- 과목저장하기 -->
+	<update id="saveSubject" parameterType="AttendanceDTO">
+		update attendance 
+		set befor =#{befor},after=#{after}
+		 where asort=2 and number=#{number} and date=#{date};
+	</update>
+	
+	<!-- 과목 리스트 보여주기 -->
+	<select id="getSubjectList" resultType="SubjectDTO">
+	select *
+	 from subject 
+	 where status=1;
+	</select>
+	
+	<!-- people확인하기 -->
+	<select id="getPeople" parameterType="peopleDTO" resultType="peopleDTO">
+	select * 
+	from people 
+	where pname=#{pname} 
+		and pinfo=#{pinfo};
+	</select>
+	
+	
+	<!-- 출석하기 -->
+	<update id="att" parameterType="AttendanceDTO" >
+	update attendance 
+	set att=3, adate=now()
+	where asort=#{asort}
+	and number=#{number} 
+	and date=#{date};
+	</update>
+	
+	
+	<!-- 강사 출결하기 -->
+	<update id="attTeacher" parameterType="AttendanceDTO">
+	update attendance
+	set att=3,adate=now(),acontent=#{acontent}
+	where ano=#{ano}
+	</update>
+	
+	<!-- 강사id로 수업목록 가져오기 -->
+	<select id="getSubjectfrommid" parameterType="String" resultType="SubjectDTO">
+		select * 
+		from subject 
+		where mid=#{mid};
+	</select>
+	
+	<!-- 과목선택후 보여줄 att목록  -->
+	<select id="getAttList" parameterType="AttendanceDTO" resultType="AttendanceDTO">
+	SELECT ano, date, asort, number, att,acontent,adate ,befor,beforcon,after,aftercon,pname  
+		FROM attendance  left JOIN people  ON attendance.number = people.pno 
+		where (attendance.befor=#{befor} or attendance.after=#{after}) and attendance.date=#{date};
+	
+	
+	</select>
+	
+	<!-- 오전상태입력 -->
+	<update id="setAttbeforcon" parameterType="AttendanceDTO">
+	update attendance 
+	set beforcon =#{beforcon}
+	 where  ano=#{ano};
+	</update>
+	
+	<!-- 오후상태입력 -->
+	<update id="setAttaftercon" parameterType="AttendanceDTO">
+	update attendance 
+	set aftercon =#{aftercon}
+	 where  ano=#{ano};
+	</update>
+	
+	
+	<!-- 강사리스트 호출 -->
+	<select id="getTeacherList" parameterType="String" resultType="Member">
+	select * 
+	from club99.member 
+	where  msort= 'm02'
+	and mdel=0;
+	</select>
+	
+	
+	<!-- 강사목록 att에 넣기 -->
+	<insert id="teacherInsert" parameterType="AttendanceDTO">
+		INSERT INTO attendance (date, asort, number)
+		 VALUES (#{date}, 1,#{number});
+	</insert>
+	
+	<!-- 피플 리스트 호출 -->
+	<select id="getPeopleList" parameterType="String" resultType="ClassDTO">
+	select pno
+	from class 
+	where month=#{month}
+	and status= 1;
+	</select>
+	
+	<!-- 피플목록att에 넣기 -->
+	<insert id="PeopleInsert" parameterType="AttendanceDTO">
+		INSERT INTO attendance (date, asort, number)
+		 VALUES (#{date}, 2,#{number});
+	</insert>
+	
+	<!-- id로 mno값 가져오기 -->
+	<select id="searchmno" parameterType="String" resultType="int">
+	select * from member
+	where mid=#{mid};
+	</select>
+
+	<!-- 
+			2020.08.22
+	-->
+	
+	<!-- attendance 리스트 가져오기  -->
+ 	<select id="getAttendanceListSearch" resultType="AttendanceDTO" >
+		<![CDATA[
+	    SELECT *
+	    FROM attendance
+	    WHERE ano > 0 
+	    ]]>
+		<include refid="search" />
+		<include refid="searchStatus" />
+	    <include refid="searchDate" />
+		<![CDATA[
+	    ORDER BY ano DESC
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+	
+	<!-- attendance 리스트 글 개수 가져오기  -->
+ 	<select id="countAttendanceListSearch" resultType="int" >
+		<![CDATA[
+	    SELECT COUNT(ano)
+	    FROM attendance
+	    WHERE ano > 0
+	    ]]>
+		<include refid="search" />
+		<include refid="searchStatus" />
+		<include refid="searchDate" />
+	</select>
+
+	<sql id="search">
+		<if test="keyword != ''.toString() ">
+			<if test="searchType == 't'.toString()">
+				AND number IN (SELECT mno
+							   FROM member
+							   WHERE mname like CONCAT('%',#{keyword},'%')) 
+				
+			</if>
+			<if test="searchType == 'p'.toString()">
+				AND number IN (SELECT pno
+							   FROM people
+							   WHERE pname like CONCAT('%',#{keyword},'%'))
+			</if>
+		</if>
+		
+		<if test="searchType == 't'.toString()">
+			AND asort=1
+		</if>
+		<if test="searchType == 'p'.toString()">
+			AND asort=2
+		</if>
+			
+	</sql>
+
+	<sql id="searchStatus">
+		<if test="status != null">
+			<if test="status == 'x'.toString()">
+				AND att = 0
+			</if>
+			<if test="status == 'l'.toString()">
+				AND att = 1
+			</if>
+			<if test="status == 'e'.toString()">
+				AND att = 2
+			</if>
+			<if test="status == 'a'.toString()">
+				AND att = 3
+			</if>
+			<if test="status == 'p'.toString()">
+				AND att = 4
+			</if>
+		</if>
+	</sql>
+	
+	<sql id="searchDate">
+		<if test="stime != null">
+			AND date = #{stime}
+		</if>
+	</sql>
+
+	<!-- attendance 리스트 가져오기(월별)  -->
+ 	<select id="getAttendanceListByNumber" resultType="AttendanceDTO" parameterType="java.util.Map">
+		<![CDATA[
+	    SELECT *
+	    FROM attendance
+	    WHERE number = #{number} AND date like CONCAT(#{date},'%')
+	    ]]>
+		<include refid="searchAsort" />
+		<![CDATA[
+	    ORDER BY date ASC
+	    ]]>
+	</select>
+
+	<sql id="searchAsort">
+		<if test="asort != null">
+			<if test="asort == 's'.toString()">
+				AND asort = 1
+			</if>
+			<if test="asort == 'p'.toString()">
+				AND asort = 2
+			</if>
+		</if>
+	</sql>
+
+
+</mapper>

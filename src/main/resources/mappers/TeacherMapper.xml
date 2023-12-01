@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mappers.TeacherMapper">
+
+	<!-- 강사추가 -->
+	<insert id="TeacherAdd" parameterType="Member">
+		INSERT INTO
+		Member (mid,
+		msort, mpw, mname, memail, img)
+		VALUES (#{mid}, 'm00', #{mpw},
+		#{mname}, #{memail},
+		'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_960_720.png')
+	</insert>
+
+	<!-- 강사리스트보기 -->
+	<select id="TeacherSearch" resultType="Member">
+		select *
+		from member
+		where
+		msort='m02'
+	</select>
+
+	<!-- 과목리스트보기 -->
+	<select id="SubjectSearch"
+		resultType="kr.co.gugu.domain.SubjectDTO">
+		select *
+		from subject
+	</select>
+
+	<!-- 상세보기_회원 -->
+	<select id="TeacherMember"
+		resultType="kr.co.gugu.domain.MemberDTO"
+		parameterType="kr.co.gugu.domain.MemberDTO">
+		select *
+		from member
+		where mid=#{mid} and mdel = 0
+	</select>
+
+	<!--강사정보 보기 -->
+	<select id="TeacherTeacher"
+		resultType="kr.co.gugu.domain.TeacherDTO" parameterType="string">
+		select *
+		from
+		teacher
+		where mid=#{mid}
+	</select>
+
+	<select id="TeacherTeacher0"
+		resultType="kr.co.gugu.domain.TeacherDTO" parameterType="string">
+		select *
+		from
+		teacher
+		where mid=#{mid} and status='0'
+	</select>
+
+	<select id="TeacherTeacher1"
+		resultType="kr.co.gugu.domain.TeacherDTO" parameterType="string">
+		select *
+		from
+		teacher
+		where mid=#{mid} and status='1'
+	</select>
+
+	<select id="TeacherTeacher2"
+		resultType="kr.co.gugu.domain.TeacherDTO" parameterType="string">
+		select *
+		from
+		teacher
+		where mid=#{mid} and status='2'
+	</select>
+
+	<!-- 과목정보 보기 -->
+	<select id="TeacherSubject"
+		resultType="kr.co.gugu.domain.SubjectDTO"
+		parameterType="kr.co.gugu.domain.SubjectDTO">
+		select *
+		from subject
+		where mid=#{mid}
+	</select>
+
+	<!-- 강사업무_강사정보 업데이트 -->
+	<update id="MemberUpdate"
+		parameterType="kr.co.gugu.domain.MemberDTO">
+		update club99.member
+		set mname=#{mname},
+		memail=#{memail},
+		number=#{number}
+		where mid=#{mid} and mdel=0
+	</update>
+
+	<update parameterType="kr.co.gugu.domain.MemberDTO"
+		id="MemberUpdate2">
+		update club99.member
+		set msort=#{msort}
+		where mid=#{mid} and mdel=0
+	</update>
+	<!-- 강사업무_강사소개 업데이트 -->
+	<update id="TeacherUpdate"
+		parameterType="kr.co.gugu.domain.TeacherDTO">
+		update teacher
+		set status=#{status}, tdate=#{tdate}, content=#{content}, img=#{img}
+		where tno=#{tno}
+	</update>
+
+	<!-- 강사업무_과목업데이트 -->
+	<update id="SubjectUpdate"
+		parameterType="kr.co.gugu.domain.SubjectDTO">
+		update club99.subject
+		set sname=#{sname},
+		content=#{content},
+		stime=#{stime},
+		status=#{status}
+		where sno=#{sno};
+	</update>
+
+	<!-- 강사업무_과목추가 -->
+	<insert id="SubjectAdd"
+		parameterType="kr.co.gugu.domain.SubjectDTO">
+		INSERT INTO
+		subject (sname, content, mid, stime, status,
+		ssort)
+		VALUES (#{sname}, #{content}, #{mid}, #{stime}, #{status},
+		#{ssort})
+	</insert>
+
+
+	<!-- 강사업무_강사소개 추가 -->
+	<insert id="TeacherInfoAdd"
+		parameterType="kr.co.gugu.domain.TeacherDTO">
+		INSERT INTO
+		teacher (mid, status, tdate, content, img)
+		VALUES
+		(#{mid}, #{status}, #{tdate}, #{content}, #{img})
+	</insert>
+
+	<!-- 페이징처리 -->
+	<select id="Paging" resultType="kr.co.gugu.domain.MemberDTO">
+		<![CDATA[
+		select *
+		from member
+		where mno>0 
+		order by mno desc 
+		limit #{pageStart}, #{perPageNum}
+		]]>
+	</select>
+	<select id="CountPaging" resultType="java.lang.Integer">
+		<![CDATA[
+		select count(mno)
+		from member
+		where mdel=0  
+		]]>
+	</select>
+
+	<!-- 멤버 검색 -->
+	<select id="Search" resultType="kr.co.gugu.domain.MemberDTO"
+		parameterType="SearchPaging">
+	
+	    <![CDATA[
+	    SELECT *
+	    FROM member
+	    WHERE msort='m02'and mdel=0 
+	    ]]>
+		<include refid="search" />
+	    <![CDATA[
+	    ORDER BY mno DESC
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+
+
+	<select id="SearchPaging" parameterType="SearchPaging"
+		resultType="java.lang.Integer">
+	    <![CDATA[
+	    SELECT
+	        COUNT(mno)
+	    FROM member
+	    WHERE mdel=0 and mno>0 
+	    ]]>
+		<include refid="search" />
+	</select>
+
+
+	<select parameterType="SearchPaging" id="RequestSearch"
+		resultType="kr.co.gugu.domain.MemberDTO">
+		<![CDATA[ SELECT * 
+		FROM member 
+		WHERE msort='m00'and mdel=0 ]]>
+				<include refid="search" />
+		<![CDATA[ ORDER BY mno 
+		DESC LIMIT #{pageStart}, #{perPageNum} ]]>
+	</select>
+
+
+	<select parameterType="SearchPaging" id="RequestSearchPaging"
+		resultType="java.lang.Integer">
+			<![CDATA[ SELECT COUNT(mno) 
+			FROM member 
+			WHERE mdel=0 and mno>0 ]]>
+		<include refid="search" />
+	</select>
+
+
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+				AND mname LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'c'.toString()">
+				AND mno LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+		</if>
+	</sql>
+
+</mapper>

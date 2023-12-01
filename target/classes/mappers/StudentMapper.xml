@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mappers.StudentMapper">
+
+	<!-- 원생리스트보기 -->
+	<select id="MemberList"
+		resultType="kr.co.gugu.domain.MemberDTO">
+		select *
+		from member
+		where msort='m01' and mdel = 0
+		order by mno desc
+	</select>
+
+	<!-- nav 마이페이지 상세보기_번호로 -->
+	<select id="MemberSearch" resultType="kr.co.gugu.domain.MemberDTO">
+		select *
+		from member
+		where mno=#{mno} and mdel = 0
+		order by mno desc
+	</select>
+	
+	<!-- 마이페이지상세보기_아이디로 -->
+	<select id="MemberSearchId"
+		resultType="kr.co.gugu.domain.MemberDTO" parameterType="kr.co.gugu.domain.MemberDTO">
+		select *
+		from member
+		where mid=#{mid} and mdel = 0
+	</select>
+	
+		<!-- 원생상세보기_아이디로 -->
+	<select id="PeopleSearchId"
+		resultType="kr.co.gugu.domain.PeopleDTO" parameterType="kr.co.gugu.domain.PeopleDTO">
+		select *
+		from people
+		where mid=#{mid}
+	</select>
+	
+		<select id="PeopleSearchId1"
+		resultType="kr.co.gugu.domain.PeopleDTO" parameterType="kr.co.gugu.domain.PeopleDTO">
+		select *
+		from people
+		where pno=#{pno}
+	</select>
+	
+	<select id="AttendSearchId"
+		resultType="kr.co.gugu.domain.AttendanceDTO" parameterType="kr.co.gugu.domain.AttendanceDTO">
+		select *
+		from attendance
+		where number=#{pno}
+	</select>
+	
+		<!-- 마이페이지 정보수정 -->
+	<update id="MemberMypageUpdate"
+		parameterType="kr.co.gugu.domain.MemberDTO">
+		update club99.member
+		set mname=#{mname},
+			memail=#{memail},
+			etc=#{etc},
+			mdel=#{mdel}
+		where mid=#{mid} and mdel=0
+	</update>
+	
+			<!-- 원생정보수정 -->
+	<update id="PeopleMypageUpdate"
+		parameterType="kr.co.gugu.domain.PeopleDTO">
+		update club99.people
+		set pname=#{pname},
+			pinfo=#{pinfo},
+			psex=#{psex},
+			pnumber=#{pnumber}
+		where pno=#{pno}
+	</update>
+	
+	<update id="MypageInfoUpdate"
+		parameterType="kr.co.gugu.domain.PeopleDTO">
+		update club99.people
+		set pname=#{pname},
+			pinfo=#{pinfo},
+			psex=#{psex},
+			pnumber=#{pnumber}
+		where pno=#{pno}
+	</update>
+	
+		<!-- 원생추가 -->
+	<insert id="PeopleAdd" parameterType="kr.co.gugu.domain.PeopleDTO">
+		insert into
+		people (mid, pname, pinfo, psex, pnumber) 
+		values (#{mid}, #{pname}, #{pinfo}, #{psex}, #{pnumber})
+	</insert>
+	
+		<!-- 페이징처리 -->
+	<select id="Paging" resultType="kr.co.gugu.domain.MemberDTO">
+		<![CDATA[
+		select *
+		from member
+		where mno>0 
+		order by mno desc
+		limit #{pageStart}, #{perPageNum}
+		]]>
+	</select>
+	<select id="CountPaging" resultType="java.lang.Integer">
+		<![CDATA[
+		select count(mno)
+		from member
+		where mdel=0 and mno>0 
+		]]>
+	</select>
+
+	<!-- 원생 검색 -->
+	<select id="Search" resultType="kr.co.gugu.domain.MemberDTO"
+		parameterType="SearchPaging">
+	
+	    <![CDATA[
+	    SELECT *
+	    FROM member
+	    WHERE msort='m01' and mdel=0 
+	    ]]>
+		<include refid="search" />
+	    <![CDATA[
+	    ORDER BY mno DESC
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+
+	<select id="SearchPaging" parameterType="SearchPaging"
+		resultType="java.lang.Integer">
+	    <![CDATA[
+	    SELECT
+	        COUNT(mno)
+	    FROM member
+	    WHERE mdel=0 and mno>0
+	    ]]>
+		<include refid="search" />
+	</select>
+
+
+
+
+	<!-- 원생 검색 -->
+	<select id="UserSearch" resultType="kr.co.gugu.domain.PeopleDTO"
+		parameterType="SearchPaging">
+	    <![CDATA[
+	    SELECT *
+	    FROM people
+	    WHERE PNO!=0
+	    ]]>
+		<include refid="Usersearch" />
+	    <![CDATA[
+	    ORDER BY pno DESC
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+
+	<select id="UserSearchPaging" parameterType="SearchPaging"
+		resultType="java.lang.Integer">
+	    <![CDATA[
+	    SELECT COUNT(pno)
+	    FROM people
+	    WHERE PNO!=0
+	    
+	    ]]>
+		<include refid="Usersearch" />
+	</select>
+	
+	<sql id="Usersearch">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+				AND pname LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+		</if>
+	</sql>
+
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+				AND mname LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'c'.toString()">
+				AND mno LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+		</if>
+	</sql>
+
+</mapper>

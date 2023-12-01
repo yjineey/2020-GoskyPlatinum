@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace ="mappers.RoomMapper"	>
+
+	<!-- 강의실 등록 -->
+	<insert id ="AddRoom" parameterType ="kr.co.gugu.domain.RoomDTO">
+	insert into club99.room (roomno, content, address,rmanager,rname)
+	values (#{roomno},#{content},#{address}, #{rmanager}, #{rname})	
+	</insert>
+	
+	<!-- 강의실 목록 -->
+	<select id="RoomList" resultType ="kr.co.gugu.domain.RoomDTO">
+	select *
+	from club99.room
+	order by roomno 
+		
+	</select>
+	
+	<!-- 페이징처리 -->
+	<select id="Paging" resultType="kr.co.gugu.domain.RoomDTO">
+		<![CDATA[
+		select *
+		from room
+		where roomno>0
+		order by roomno 
+		limit #{pageStart}, #{perPageNum}
+		]]>
+	</select>
+	<select id="CountPaging" resultType="java.lang.Integer">
+		<![CDATA[
+		select count(roomno)
+		from room
+		where roomno>0	
+		]]>
+	</select>
+
+	<select id="Search" resultType="kr.co.gugu.domain.RoomDTO">
+	    <![CDATA[
+	    SELECT *
+	    FROM room
+	    WHERE roomno > 0
+	    ]]>
+			<include refid="search" />
+	    <![CDATA[
+	    ORDER BY roomno 
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+
+	<select id="SearchPaging" resultType="java.lang.Integer">
+	    <![CDATA[
+	    SELECT
+	        COUNT(roomno)
+	    FROM room
+	    WHERE roomno > 0
+	    ]]>
+		<include refid="search" />
+	</select>
+
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 'rn'.toString()">
+				AND rname LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'rm'.toString()">
+				AND rmanager LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			
+		</if>
+	</sql>
+	
+	<!-- 상세보기 -->
+	<select id="RoomDetail" parameterType="java.lang.Integer"
+		resultType="kr.co.gugu.domain.RoomDTO">
+		select *
+		from room
+		where roomno = #{roomno}
+	</select>
+	
+	<!-- 수정 -->
+	<update id="RoomUpdate"
+		parameterType="kr.co.gugu.domain.RoomDTO">
+		update room
+		set
+		rname=#{rname}, rmanager =#{rmanager},content=#{content}, address=#{address}
+		where roomno =#{roomno}
+	</update>
+	<!-- 삭제 -->
+	<delete id="RoomDelete" parameterType="java.lang.Integer">
+		delete from
+		room
+		where roomno=#{roomno}
+	</delete>
+	
+	
+	
+	
+	<!-- 강의실 이름 가져오기 -->
+	<select id="getRoomName" parameterType="java.lang.Integer"
+		resultType="String">
+		select rname
+		from room
+		where roomno = #{roomno}
+	</select>
+</mapper>

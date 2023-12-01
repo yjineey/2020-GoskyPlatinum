@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="mappers.SubjectMapper"> 
+ 
+ 	<!--
+ 	
+ 						Act
+ 	
+ 	 -->
+ 
+ 	<!-- act 등록하기 -->
+ 	<insert id="insertAct" parameterType="Act">
+		INSERT INTO
+		act (name, room, img, intro)
+		values (#{name}, #{room}, #{img}, #{intro})
+	</insert>
+	
+ 	<!-- act 리스트 가져오기 (번호, 이름) -->
+ 	<select id="getActList" resultType="Act">
+		SELECT ssno, name
+		FROM act
+		WHERE status=1
+	</select>
+	
+ 	<!-- act 이름 가져오기 -->
+ 	<select id="getActName" resultType="String" parameterType="int">
+		SELECT name
+		FROM act
+		WHERE ssno = #{ssno}
+	</select>
+	
+ 	<!-- act 정보 가져오기 -->
+ 	<select id="getAct" resultType="Act" parameterType="int">
+		SELECT *
+		FROM act
+		WHERE ssno = #{ssno}
+	</select>
+	
+ 	<!-- act 정보 수정 -->
+ 	<update id="updateAct" parameterType="Act">
+		UPDATE act
+		SET name=#{name}, room=#{room}, img=#{img}, intro=#{intro}, status=#{status}
+		WHERE ssno = #{ssno}
+	</update>
+ 
+ 	<!-- act 리스트 가져오기  -->
+ 	<select id="getActListSearch" resultType="Act" >
+		<![CDATA[
+	    SELECT *
+	    FROM act
+	    WHERE ssno > 0
+	    ]]>
+		<include refid="search" />
+		<include refid="searchStatus" />
+		<![CDATA[
+	    ORDER BY ssno DESC
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+	
+ 	<!-- act 리스트 글 개수 가져오기  -->
+ 	<select id="countActListSearch" resultType="int" >
+		<![CDATA[
+	    SELECT COUNT(ssno)
+	    FROM act
+	    WHERE ssno > 0
+	    ]]>
+		<include refid="search" />
+		<include refid="searchStatus" />
+	</select>
+ 	
+ 	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 'r'.toString()">
+				AND room IN (SELECT roomno
+                             FROM room
+                          	 WHERE rname like CONCAT('%',#{keyword},'%'))
+			</if>
+			<if test="searchType == 't'.toString()">
+				AND name LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+		</if>
+	</sql>
+	
+ 	<sql id="searchStatus">
+		<if test="status != null">
+			<if test="status == 'r'.toString()">
+				AND status = 0
+			</if>
+			<if test="status == 'o'.toString()">
+				AND status = 1
+			</if>
+			<if test="status == 'x'.toString()">
+				AND status = 2
+			</if>
+		</if>
+	</sql>
+ 
+ 	
+ 
+ 	<!-- 
+ 	
+ 						Subject
+ 	
+ 	 -->
+ 
+	<!-- Subject 추가 -->
+	<insert id="insertSubject" parameterType="Subject">
+		INSERT INTO
+		subject (ssort, sname, stime, mid, content)
+		values (#{ssort}, #{sname}, #{stime}, #{mid}, #{content})
+	</insert>
+ 
+ 	<!-- 진행중 수업 리스트 가져오기 -->
+ 	<select id="getSubjectList" resultType="Subject">
+ 		SELECT *
+ 		FROM subject
+ 		ORDER BY sno DESC
+ 	</select>
+ 
+ 	<!-- 강의 정보 가져오기 -->
+ 	<select id="getSubject" resultType="Subject" parameterType="int">
+ 		SELECT *
+ 		FROM subject
+ 		WHERE sno = #{sno}
+ 	</select>
+ 	
+ 	<!-- 해당 종목 강사 리스트 가져오기 -->
+ 	<select id="getTeacherListBySsort" resultType="Member" parameterType="int">
+ 		SELECT mno, mid, mname
+ 		FROM Member
+ 		WHERE msort = 'm02' AND mid IN (SELECT mid
+                   			            FROM teacher
+                      			        WHERE status = 0 AND tdate = #{ssort})
+ 	</select>
+ 
+ 	<!-- 강의 정보 수정 -->
+	<update id="updateSubject" parameterType="Subject">
+		UPDATE subject
+		SET ssort = #{ssort}, sname = #{sname}, stime = #{stime},
+			mid = #{mid}, status = #{status}, content = #{content}
+		WHERE sno = #{sno}
+	</update>
+ 
+ 	<!-- subject 리스트 가져오기  -->
+ 	<select id="getSubjectListSearch" resultType="Subject" >
+		<![CDATA[
+	    SELECT *
+	    FROM subject
+	    WHERE sno > 0
+	    ]]>
+		<include refid="search2" />
+		<include refid="searchStatus" />
+		<include refid="searchStime" />
+		<![CDATA[
+	    ORDER BY sno DESC
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+	
+ 	<!-- subject 리스트 글 개수 가져오기  -->
+ 	<select id="countSubjectListSearch" resultType="int" >
+		<![CDATA[
+	    SELECT COUNT(sno)
+	    FROM subject
+	    WHERE sno > 0
+	    ]]>
+		<include refid="search2" />
+		<include refid="searchStatus" />
+		<include refid="searchStime" />
+	</select>
+ 
+ 	<sql id="search2">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+				AND ssort IN (SELECT ssno
+                             FROM act
+                          	 WHERE name like CONCAT('%',#{keyword},'%'))
+			</if>
+			<if test="searchType == 'r'.toString()">
+				AND sname LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'tn'.toString()">
+				AND mid IN (SELECT mid
+                            FROM member
+                          	WHERE mname like CONCAT('%',#{keyword},'%'))
+			</if>
+		</if>
+	</sql>
+	
+ 	<sql id="searchStime">
+		<if test="stime != null">
+			<if test="stime == 'a'.toString()">
+				AND stime = 0
+			</if>
+			<if test="stime == 'p'.toString()">
+				AND stime = 1
+			</if>
+		</if>
+	</sql>
+ 
+ 
+ 	<!-- room 이름 가져오기 
+ 	<select id="getRoomData" resultType="String" parameterType="int">
+ 		SELECT roomdater
+ 		FROM room
+ 		WHERE room = #{room}
+ 	</select>-->
+ 	
+ 	<!-- room 리스트 가져오기 
+ 	<select id="getRoomList" resultType="Room">
+ 		SELECT *
+ 		FROM room
+ 	</select>-->
+ 	
+ 	<!-- 현재 인원 카운트 -->
+ 	<select id="getSubjectPerson" resultType="int" parameterType="int">
+ 		SELECT COUNT(*)
+ 		FROM class
+ 		WHERE cno = #{sno} AND status = 1
+ 	</select>
+ 	
+ 	
+ 	
+ 	
+	
+ 	
+	
+</mapper>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mappers.ClassApplyMapper">
+
+<!-- 수업일정 -->
+
+<!-- 현재날짜로 수업테이블에서 이름,번호,stitme 가져오기 -->
+	<select id="classlistbefore"  resultType="SubjectDTO">
+	select sno, sname, stime 
+	from subject 
+	where status= 1 and stime=0;
+	</select>
+	
+	<select id="clistbefore" parameterType="String"  resultType="SubjectDTO">
+	select sno, sname, stime 
+	from subject 
+	where status= 1 and stime=0 and mid=#{mid};
+	</select>
+	
+	<select id="clistafter" parameterType="String"  resultType="SubjectDTO">
+	select sno, sname, stime 
+	from subject 
+	where status= 1 and stime=1 and mid=#{mid};
+	</select>
+	
+	
+	<select id="classlistafter"  resultType="SubjectDTO">
+	select sno, sname, stime 
+	from subject 
+	where status= 1 and stime=1;
+	</select>
+	
+
+
+<!-- sno로 수업테이블에서 모든정보 가져오기 -->
+<select id="classOne" parameterType="int" resultType="SubjectDTO">
+	select * 
+	from subject
+	where sno=#{sno};
+</select>
+
+
+
+
+
+
+
+<insert id="classapply" parameterType="ClassDTO" >
+	INSERT INTO class (month, pno,etc)
+	 VALUES (#{month}, #{pno},#{etc});
+	 
+</insert>
+	
+	
+	
+	
+	
+	
+<!-- 해당 아이디의 people리스트 출력 -->
+<select id="searchpeople" parameterType="String" resultType="peopleDTO">
+	select *
+	 from people 
+	 where mid=#{mid};
+	
+</select>
+
+<select id="searchpeople2"  resultType="peopleDTO">
+	select *
+	 from people where pno>0;
+</select>
+
+
+
+<!-- 종목정보 가져오기 -->
+<select id="searchAct" parameterType="int" resultType="ActDTO">
+	select *
+	from act
+	where ssno=#{ssort};
+
+</select>
+
+
+
+<!-- 강의실 정보 가져오기 -->
+<select id="searchRoom" parameterType="int" resultType="RoomDTO">
+	select *
+	from room
+	where roomno=#{room};
+
+</select>
+
+
+
+	<!-- act 리스트 가져오기  -->
+ 	<select id="getClassApplyListSearch" resultType="ClassDTO" >
+		<![CDATA[
+	    SELECT *
+	    FROM class
+	    WHERE cano > 0 
+	    ]]>
+		<include refid="search" />
+		<include refid="searchStatus" />
+	    <include refid="searchMonth" />
+		<![CDATA[
+	    ORDER BY cano DESC
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+	
+	<!-- act 리스트 글 개수 가져오기  -->
+ 	<select id="countClassApplyListSearch" resultType="int" >
+		<![CDATA[
+	    SELECT COUNT(cano)
+	    FROM class
+	    WHERE cano > 0
+	    ]]>
+		<include refid="search" />
+		<include refid="searchStatus" />
+		<include refid="searchMonth" />
+	</select>
+
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 'm'.toString()">
+				AND pno IN (SELECT pno
+							FROM people
+							WHERE mid IN (SELECT mid
+                            			  FROM member
+                          				  WHERE mname like CONCAT('%',#{keyword},'%')
+                          				  )
+							) 
+				
+			</if>
+			<if test="searchType == 's'.toString()">
+				AND pno IN (SELECT pno
+							FROM people
+							WHERE pname like CONCAT('%',#{keyword},'%'))
+			</if>
+			<if test="searchType =='xxx'.toString()">
+				and pno =#{pno}
+			</if>
+		</if>
+	</sql>
+
+	<sql id="searchStatus">
+		<if test="status != null">
+			<if test="status == 'a'.toString()">
+				AND status = 0
+			</if>
+			<if test="status == 'l'.toString()">
+				AND status = 1
+			</if>
+			<if test="status == 'c'.toString()">
+				AND status = 2
+			</if>
+		</if>
+	</sql>
+	
+	<sql id="searchMonth">
+		<if test="cdate != 0">
+			<if test="dateType == 'm'.toString()">
+				AND month = #{cdate}
+			</if>
+		</if>
+	</sql>
+
+	<!-- 2020 08 25 -->
+
+	<!-- 수강 신청 Detail -->
+	<select id="getClassApply" parameterType="int" resultType="ClassDTO">
+		SELECT cl.*, pp.pname
+		FROM class AS cl
+		JOIN people AS pp
+		ON cl.pno = pp.pno
+		WHERE cl.cano = #{cano}
+	</select>
+
+	<!-- 과목저장하기 -->
+	<update id="updateClassApply" parameterType="ClassDTO">
+		UPDATE class 
+		SET month=#{month}, status=#{status}, etc=#{etc}, sdate=#{sdate} 
+		WHERE cano=#{cano}
+	</update>
+
+</mapper>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mappers.WorkListMapper">
+
+	<select id="SelectMsno" parameterType="String"
+		resultType="java.lang.Integer">
+		select msno
+		from message
+		where content=#{content}
+		order by
+		msno desc limit 1;
+	</select>
+
+	<!-- 강사업무리스트 -->
+	<select id="WorkList" resultType="kr.co.gugu.domain.WorkListDTO"
+		parameterType="java.lang.Integer">
+		select *
+		from club99.worklist
+		where msno=#{msno}
+		order by wno desc
+	</select>
+
+	<!-- 관리자업무리스트 -->
+	<select id="MworkList"
+		resultType="kr.co.gugu.domain.InterviewDTO">
+		select *
+		from club99.message
+		where mssort='ms03' and del=0
+		order by msno desc
+	</select>
+
+	<!-- 강사업무상세보기 -->
+	<select id="WorkListDetail" parameterType="java.lang.Integer"
+		resultType="kr.co.gugu.domain.InterviewDTO">
+		select *
+		from club99.message
+		where msno=#{msno} and del=0
+	</select>
+
+	<!-- 강사업무완료 (현재 진행현황) -->
+	<update id="WorkListStatus" parameterType="java.util.Map">
+		update club99.worklist
+		set finish= #{finish}
+		where msno=#{msno}
+	</update>
+
+	<!-- 관리자 업무 작성 -->
+	<insert id="MessageWrite"
+		parameterType="kr.co.gugu.domain.InterviewDTO">
+		insert into
+		club99.message(fromid, title, content, toid,
+		mssort)
+		values(#{fromid}, #{title}, #{content},'${toid}', 'ms03')
+	</insert>
+
+	<!-- 강사 업무 작성 -->
+	<insert id="WorkListWrite"
+		parameterType="kr.co.gugu.domain.InterviewDTO">
+		insert into
+		club99.worklist(msno, fromid)
+		values(#{msno},
+		#{fromid})
+	</insert>
+
+	<!-- 강사업무내역 확인여부 -->
+	<update id="readchk" parameterType="java.lang.Integer">
+		update club99.message
+		set
+		readchk = 1
+		where msno=#{msno}
+	</update>
+
+	<!-- 페이징처리 -->
+	<select id="Paging" resultType="kr.co.gugu.domain.WorkListDTO">
+		<![CDATA[
+		select *
+		from worklist
+		where wno>0 
+		order by wno desc
+		limit #{pageStart}, #{perPageNum}
+		]]>
+	</select>
+	<select id="CountPaging" resultType="java.lang.Integer">
+		<![CDATA[
+		select count(wno)
+		from worklist
+		where wno>0 
+		]]>
+	</select>
+
+	<!-- 강사 검색 -->
+	<select id="FromSearch"
+		resultType="kr.co.gugu.domain.InterviewDTO"
+		parameterType="SearchPaging">
+	
+	    <![CDATA[
+	    SELECT *
+	    FROM message
+	    WHERE mssort='ms03' and del=0 and fromid=#{fromid}
+	    ]]>
+		<include refid="search" />
+	    <![CDATA[
+	    ORDER BY regdate DESC
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+
+	<select id="FromSearchPaging" parameterType="SearchPaging"
+		resultType="java.lang.Integer">
+	    <![CDATA[
+	    SELECT
+	        COUNT(msno)
+	    FROM message
+	    WHERE del=0 and fromid=#{fromid}
+	    ]]>
+		<include refid="search" />
+	</select>
+
+	<!-- 관리자 검색 -->
+	<select id="Search" resultType="kr.co.gugu.domain.InterviewDTO"
+		parameterType="SearchPaging">
+	
+	    <![CDATA[
+	    SELECT *
+	    FROM message
+	    WHERE mssort='ms03' and del=0 
+	    ]]>
+		<include refid="search" />
+	    <![CDATA[
+	    ORDER BY regdate DESC
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+
+	<select id="SearchPaging" parameterType="SearchPaging"
+		resultType="java.lang.Integer">
+	    <![CDATA[
+	    SELECT
+	        COUNT(msno)
+	    FROM message
+	    WHERE del=0 
+	    ]]>
+		<include refid="search" />
+	</select>
+
+
+
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+				AND title LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'c'.toString()">
+				AND content LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'w'.toString()">
+				AND fromid LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'tc'.toString()">
+				AND (
+				title LIKE CONCAT('%', #{keyword}, '%')
+				OR content
+				LIKE CONCAT('%', #{keyword}, '%')
+				)
+			</if>
+			<if test="searchType == 'cw'.toString()">
+				AND (
+				content LIKE CONCAT('%', #{keyword}, '%')
+				OR fromid
+				LIKE CONCAT('%', #{keyword}, '%')
+				)
+			</if>
+			<if test="searchType == 'tcw'.toString()">
+				AND (
+				title LIKE CONCAT('%', #{keyword}, '%')
+				OR content
+				LIKE CONCAT('%', #{keyword}, '%')
+				OR fromid LIKE CONCAT('%',
+				#{keyword},
+				'%')
+				)
+			</if>
+		</if>
+	</sql>
+
+</mapper>

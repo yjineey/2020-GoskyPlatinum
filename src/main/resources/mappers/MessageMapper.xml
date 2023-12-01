@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mappers.MessageMapper">
+
+
+
+	<!-- 검색 조회리스트 수 -->
+	<select id="searchCnt" parameterType="Search" resultType="int">
+		SELECT
+
+		count(*) as
+		listCnt
+
+		FROM
+
+		MESSAGE
+		
+		 <trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="searchType=='title' and keyword != null and keyword != '' ">
+				AND title like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType=='content' and keyword != null and keyword != '' ">
+				AND content like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType=='toid' and keyword != null and keyword != '' ">
+				AND toid like CONCAT('%', #{keyword}, '%')
+			</if>	
+		</trim>
+		
+		AND del=0 and mssort='ms01' and fromid=#{toid};
+
+	</select>
+
+<!-- 검색리스트 -->
+	<select id="searchMessage" parameterType="Search" resultType="MessageDTO">
+		SELECT *
+		FROM
+		MESSAGE
+		
+		 <trim prefix="WHERE" prefixOverrides="AND|OR">
+			<if test="searchType=='title' and keyword != null and keyword != '' ">
+				AND title like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType=='content' and keyword != null and keyword != '' ">
+				AND content like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType=='toid' and keyword != null and keyword != '' ">
+				AND toid like CONCAT('%', #{keyword}, '%')
+			</if>	
+		</trim>
+		AND DEL=0 AND mssort ='ms01'and fromid=#{toid}
+		order by msno desc
+		LIMIT
+		#{startList}, #{listSize};
+	</select>
+
+	<!-- 받은 메세지 조회리스트 수 -->
+	<select id="receivedlistCnt" parameterType="Pagination"  resultType="int">
+		SELECT
+
+		count(*) as
+		listCnt
+
+		FROM
+
+		MESSAGE
+		where del=0 and mssort='ms01' and fromid=#{toid};
+
+	</select>
+
+	<!-- 보낸 메세지 조회리스트 수 -->
+	<select id="sendlistCnt" parameterType="String" resultType="int">
+		SELECT
+
+		count(*) as listCnt
+
+		FROM
+
+		MESSAGE
+		where del=0 and mssort='ms01' and
+		toid= #{toid};
+
+	</select>
+
+
+
+	<!-- 휴지통 상담 조회리스트 수 -->
+	<select id="dellistCnt" parameterType="Pagination"
+		resultType="int">
+		SELECT
+
+		count(*) as listCnt
+
+		FROM
+
+		MESSAGE
+		where del=1 and
+		mssort='ms01' and fromid= #{toid} ;
+
+	</select>
+
+
+<!-- 삭제취소 -->
+	<update id="delmessagecansle" parameterType="int">
+	update message
+		set del=0
+		where
+		msno = #{msno};
+	</update>
+
+
+<!-- 하나삭제 -->
+	<update id="delmessage2" parameterType="int">
+	update message
+		set del =2
+		where msno=#{msno};
+	
+	</update>
+
+
+	<!-- 받은메세지리스트 -->
+	<select id="receivedMessagelist" parameterType="Pagination" resultType="MessageDTO">
+		SELECT *
+		FROM
+		MESSAGE
+		WHERE DEL=0 AND mssort ='ms01' and fromid=#{toid}
+		order by msno desc
+		LIMIT
+		#{startList}, #{listSize};
+	</select>
+
+
+
+	<!-- 받은메세지 디테일 -->
+	<select id="receivedMessagedetail" parameterType="int"
+		resultType="MessageDTO">
+		SELECT *
+		FROM MESSAGE
+		WHERE (DEL=0 or del=1) AND msno =#{msno};
+	</select>
+
+
+
+
+
+
+	<!-- 상담신청 -->
+	<insert id="sendMessage" parameterType="MessageDTO">
+		INSERT INTO MESSAGE
+		(mssort, toid, fromid, title, content)
+		VALUES ('ms01', #{toid},
+		#{fromid}, #{title}, #{content});
+	</insert>
+
+
+
+
+
+
+
+
+	<!-- 보낸상담내역리스트 -->
+	<select id="sendMessagelist" parameterType="Pagination"
+		resultType="MessageDTO">
+		SELECT *
+		FROM MESSAGE
+		WHERE DEL=0 AND mssort ='ms01' AND toid
+		= #{toid}
+		order by msno desc
+		LIMIT #{startList}, #{listSize};
+	</select>
+
+
+
+	<!-- 상담내역 디테일 -->
+	<select id="sendMessagedetail" parameterType="int"
+		resultType="MessageDTO">
+		SELECT *
+		FROM MESSAGE
+		WHERE (DEL=0 or DEL=1) AND mssort ='ms01' AND msno
+		=#{msno};
+	</select>
+
+
+
+	
+
+
+	<!-- 게시판 삭제 -->
+	<update id="senddelete" parameterType="int">
+		update message
+		set del=1
+		where
+		msno = #{msno};
+	</update>
+	
+	<update id="delete" parameterType="int">
+		update message
+		set del=1
+		where
+		msno = #{msno};
+	</update>
+
+
+	<!--디테일/리스트 삭제 -->
+	<update id="sendMessagedell" parameterType="int">
+		update message
+		set
+		del=1
+		where msno = #{msno}
+	</update>
+
+
+
+
+
+	<!-- 휴지통 리스트 호출 -->
+	<select id="delMessagelist" parameterType="Pagination"
+		resultType="MessageDTO">
+		SELECT *
+		FROM MESSAGE
+		WHERE DEL=1 AND mssort ='ms01'AND fromid=
+		#{toid}
+		order by msno desc
+		LIMIT #{startList},
+		#{listSize};
+	</select>
+
+
+
+	<!-- 휴지통 비우기 -->
+	<update id="delMessage" parameterType="String">
+		update message
+		set del =2
+		where del= 1 and fromid = #{toid};
+	</update>
+
+
+
+	<!-- 댓글 쓰기 -->
+	<insert id="replywrite" parameterType="MessageReply">
+		insert into
+		reply
+		(mid,content,bno)
+		values (#{mid}, #{content}, #{bno});
+
+	</insert>
+
+	<!-- 댓글조회 -->
+	<select id="Messagereplylist" parameterType="int"
+		resultType="MessageReply">
+		select * from reply
+		where bno= #{bno} and del=0;
+	</select>
+
+
+	<!-- 댓글 하나조회 -->
+	<select id="MessagereplyOne" parameterType="int"
+		resultType="MessageReply">
+		select * from reply
+		where rno=#{rno} and del=0 ;
+	</select>
+
+
+
+
+	<!-- 댓글수정 -->
+	<update id="replyupdate" parameterType="MessageReply">
+		update reply
+		set
+		content=#{content}, regdate =curdate()
+		where
+		rno=#{rno};
+	</update>
+
+
+	<!-- 댓글삭제 -->
+	<update id="replydelete" parameterType="int">
+
+		update reply
+		set del = 1
+		where
+		rno= #{rno}
+
+
+		<!-- update reply set `rememo` = '삭제된 댓글입니다' where reno=1; -->
+	</update>
+
+
+
+
+
+
+</mapper>

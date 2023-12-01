@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="mappers.BoardMapper"> 
+ 
+	<resultMap id="result" type="Board">
+        <result property="bno" column="bno"/>
+        <result property="bsort" column="bsort"/>
+        <result property="btitle" column="btitle"/>
+        <result property="bcontent" column="bcontent"/>
+        <result property="mid" column="mid"/>
+        <result property="regdate" column="regdate"/>   
+        <result property="del" column="del"/>
+        <result property="deldate" column="deldate"/>
+        <result property="readcnt" column="readcnt"/>
+        <result property="etc" column="etc"/>
+        <result property="cno" column="cno"/>
+    </resultMap>
+ 
+ 	<!-- 게시판 이름 가져오기 -->
+ 	<select id="getBoardName" resultType="String" parameterType="String">
+ 		SELECT bsname
+ 		FROM boardsort
+ 		WHERE bsort=#{bsort}
+ 	</select>
+ 	
+ 	<!-- 해당 게시판 글 개수 가져오기 -->
+ 	<select id="getCountSearchPaging" resultType="java.lang.Integer">
+	    <![CDATA[
+	    SELECT
+	        COUNT(bno)
+	    FROM board
+	    WHERE bno > 0 and bsort=#{bsort} and del=0
+	    ]]>
+		<include refid="search" />
+	</select>
+ 	
+ 	<select id="getSearchList" resultType="Board">
+	    <![CDATA[
+	    SELECT *
+	    FROM board
+	    WHERE bno > 0 and bsort=#{bsort} and del=0
+	    ]]>
+			<include refid="search" />
+	    <![CDATA[
+	    ORDER BY bno DESC, regdate DESC
+	    LIMIT #{pageStart}, #{perPageNum}
+	    ]]>
+	</select>
+ 	
+ 	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+				AND btitle LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'c'.toString()">
+				AND bcontent LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'w'.toString()">
+				AND mid IN (SELECT mid
+                            FROM member
+                          	WHERE mname like CONCAT('%',#{keyword},'%'))
+			</if>
+			<if test="searchType == 'tc'.toString()">
+				AND (
+				btitle LIKE CONCAT('%', #{keyword}, '%')
+				OR bcontent LIKE CONCAT('%', #{keyword}, '%')
+				)
+			</if>
+			<if test="searchType == 'cw'.toString()">
+				AND (
+				bcontent LIKE CONCAT('%', #{keyword}, '%')
+				OR mid IN (SELECT mid
+                           FROM member
+                           WHERE mname like CONCAT('%',#{keyword},'%'))
+				)
+			</if>
+			<if test="searchType == 'tcw'.toString()">
+				AND (
+				btitle LIKE CONCAT('%', #{keyword}, '%')
+				OR bcontent LIKE CONCAT('%', #{keyword}, '%')
+				OR mid IN (SELECT mid
+                           FROM member
+                           WHERE mname like CONCAT('%',#{keyword},'%'))
+				)
+			</if>
+		</if>
+	</sql>
+ 	
+ 	
+ 	
+ 	
+ 	<!-- 글쓰기 -->
+	<insert id="insertBoard" parameterType="Board">
+		INSERT INTO 
+		Board (bsort, btitle, bcontent, supload, mid) 
+		VALUES (#{bsort}, #{btitle}, #{bcontent}, #{supload}, #{mid})
+	</insert>
+	
+ 	<!-- 해당 게시판 리스트 가져오기 -->
+	<select id="getListByBsort" resultMap="result" parameterType="kr.co.gugu.common.PagingProcess">
+		SELECT *
+		FROM board
+		WHERE del = 0 AND bsort = #{code}
+		ORDER BY bno DESC
+		limit #{start}, #{listSize}
+	</select>
+ 	
+ 	<!-- 글 상세 보기 -->
+	<select id="getBoardByBno" resultType="Board" parameterType="int">
+		SELECT *
+		FROM board
+		WHERE bno=#{bno}
+	</select>
+ 	
+	<!-- 조회수 증가 -->
+	<update id="updateReadcnt" parameterType="int">
+		UPDATE board
+		SET readcnt = readcnt + 1
+		WHERE bno = #{bno}
+	</update>
+	
+	<!-- 삭제 (del = 0 -> 1) -->
+	<update id="deleteBoard" parameterType="int">
+		UPDATE board
+		SET del = 1
+		WHERE bno = #{bno}
+	</update>
+	
+	<!-- 내용 수정 -->
+	<update id="updateBoard" parameterType="Board">
+		UPDATE board
+		SET btitle = #{btitle}, bcontent = #{bcontent}, supload=#{supload}, regdate = now()
+		WHERE bno = #{bno}
+	</update>
+	
+	<!-- 글 개수 by bsort -->
+	<select id="countListByBsort" resultType="int" parameterType="String">
+		SELECT COUNT(*)
+		FROM board
+		WHERE bsort=#{bsort}
+	</select>
+	
+	<!-- 제목 검색 리스트 -->
+	<select id="listSearchByBtitle" resultMap="result" parameterType="kr.co.gugu.common.PagingProcess">
+		SELECT *
+		FROM board
+		WHERE del = 0 AND bsort = #{code} AND btitle like CONCAT('%',#{text},'%')
+		ORDER BY bno DESC
+		limit #{start}, #{listSize}
+	</select>
+	
+	<!-- 제목 검색 글 개수 -->
+	<select id="countSearchByBtitle" resultType="int" parameterType="kr.co.gugu.common.PagingProcess">
+		SELECT COUNT(*)
+		FROM board
+		WHERE del = 0 AND bsort = #{code} AND btitle LIKE CONCAT('%',#{text},'%')
+	</select>
+	
+	<!-- 제목 검색 리스트 -->
+	<select id="listSearchByMname" resultMap="result" parameterType="kr.co.gugu.common.PagingProcess">
+		SELECT *
+		FROM board
+		WHERE del = 0 AND bsort = #{code} AND mid IN (SELECT mid
+                          							  FROM member
+                          							  WHERE mname like CONCAT('%',#{text},'%'))
+		ORDER BY bno DESC
+		limit #{start}, #{listSize}
+	</select>
+	
+	<!-- 제목 검색 글 개수 -->
+	<select id="countSearchByMname" resultType="int" parameterType="kr.co.gugu.common.PagingProcess">
+		SELECT COUNT(*)
+		FROM board
+		WHERE del = 0 AND bsort = #{code} AND mid IN (SELECT mid
+                          							  FROM member
+                          							  WHERE mname like CONCAT('%',#{text},'%'))
+	</select>
+	
+</mapper>
